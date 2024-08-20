@@ -1,0 +1,17 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# misc
+.env
+.env.development
+.env.production
+.env.test
+
+npm-degug.log*
+yarn-debug.log*
+yarn-error.log*
+
+package-lock.json
