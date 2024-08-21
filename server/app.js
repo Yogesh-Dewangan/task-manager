@@ -1,41 +1,99 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const createError = require("http-errors");
+const path = require("path");
+const jwt = require("jsonwebtoken");
+const process = require("process");
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
+const registerRouter = require("./routes/register");
+const loginRouter = require("./routes/login");
+const tasksRouter = require("./routes/tasks");
 
-var app = express();
+const PORT = process.env.PORT || 5000;
+const secret = process.env.SECRET;
+const url = process.env.MONGO;
+
+mongoose
+  .connect(url)
+  .then(console.log("mongoose atlas is up"))
+  .catch(console.error);
+
+const app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "jade");
 
-app.use(logger('dev'));
+app.use(cors());
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use("/v1/tasks", (req, res, next) => {
+  const token = req.headers.authorization;
+  console.log("\x1b[41m%s\x1b[0m", "token: ", token);
+
+  if (token) {
+    jwt.verify(token, secret, (err, decoded) => {
+      if (err) {
+        res.status(400).json({
+          status: "Failed to decode",
+          message: err.message,
+        });
+      }
+      if (decoded) {
+        console.log(
+          "\x1b[41m%s\x1b[0m",
+          "user - decoded: ",
+          req.user,
+          decoded.data
+        );
+        req.user = decoded.data;
+        next();
+      }
+    });
+  } else {
+    return res.status(403).json({
+      status: "Failed",
+      message: "Invalid Token",
+    });
+  }
+});
+
+app.use("/v1/signup", registerRouter);
+app.use("/v1/login", loginRouter);
+// app.use("/v1/users", usersRouter);
+// app.use("/v1/tasks", tasksRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render("error");
 });
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname + "/public")));
+}
+
+app.listen(PORT, () =>
+  console.log(`Server is up at ${PORT} port`, process.env)
+);
 
 module.exports = app;
