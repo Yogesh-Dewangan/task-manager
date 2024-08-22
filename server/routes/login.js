@@ -8,7 +8,7 @@ require("dotenv").config();
 const User = require("../models/Users");
 const secret = process.env.SECRET;
 
-router.use(expres.json());
+router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 let SESSIONID = "";

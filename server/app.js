@@ -67,6 +67,7 @@ app.use("/v1/tasks", (req, res, next) => {
   }
 });
 
+app.use("/", indexRouter);
 app.use("/v1/signup", registerRouter);
 app.use("/v1/login", loginRouter);
 // app.use("/v1/users", usersRouter);
@@ -92,8 +93,6 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname + "/public")));
 }
 
-app.listen(PORT, () =>
-  console.log(`Server is up at ${PORT} port`, process.env)
-);
+app.listen(PORT, () => console.log(`Server is up at ${PORT} port`));
 
 module.exports = app;
