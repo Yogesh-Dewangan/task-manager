@@ -1,9 +1,15 @@
-import Image from "next/image";
+"use client";
+
+import Header from "./components/header-footer/header";
+import TaskCard from "./components/task/task-card";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>Hello</div>
+    <main className="min-h-screen pb-8 bg-white">
+      <Header></Header>
+      <div className="p-10">
+        <TaskCard></TaskCard>
+      </div>
     </main>
   );
 }
