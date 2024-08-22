@@ -7,12 +7,14 @@ const createError = require("http-errors");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const process = require("process");
+const passport = require("./passport-config/passport-config");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const registerRouter = require("./routes/register");
 const loginRouter = require("./routes/login");
 const tasksRouter = require("./routes/tasks");
+const loginWithGoogleRouter = require("./routes/login-with-google");
 
 const PORT = process.env.PORT || 5000;
 const secret = process.env.SECRET;
@@ -35,6 +37,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/v1/tasks", (req, res, next) => {
   const token = req.headers.authorization;
@@ -68,8 +72,9 @@ app.use("/v1/tasks", (req, res, next) => {
 });
 
 app.use("/", indexRouter);
-app.use("/v1/signup", registerRouter);
-app.use("/v1/login", loginRouter);
+app.use("/v1/auth/google", loginWithGoogleRouter);
+app.use("/v1/auth/signup", registerRouter);
+app.use("/v1/auth/login", loginRouter);
 // app.use("/v1/users", usersRouter);
 // app.use("/v1/tasks", tasksRouter);
 
